@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import pickle
 from datetime import datetime
+import plotly.graph_objects as go
 
 st.set_page_config(page_title="Gyrox Engine Core", layout="wide", initial_sidebar_state="collapsed")
 
@@ -79,8 +80,42 @@ with m_col4:
 st.markdown("---")
 st.subheader("Historical Market Baseline Analytics (Multi-Year Asset Horizon)")
 
-# FIX: Keep timestamp as a true datetime64 object so the graph uses a fluid, native time axis scale
+# Format dataframe timeline arrays securely
 chart_df = historical_lake.copy()
 chart_df['timestamp'] = pd.to_datetime(chart_df['timestamp'])
 
-st.line_chart(data=chart_df, x='timestamp', y='mineral_spot_price', use_container_width=True)
+# FIX: Build a GPU-accelerated Plotly WebGL scatter trace to instantly erase rendering lag
+fig = go.Figure()
+fig.add_trace(go.Scattergl(
+    x=chart_df['timestamp'],
+    y=chart_df['mineral_spot_price'],
+    mode='lines',
+    name='Spot Price',
+    line=dict(color='#ff4b4b', width=2),
+    hovertemplate='<b>Date:</b> %{x|%Y-%m-%d}<br><b>Asset Value:</b> $%{y:.2f} USD<extra></extra>'
+))
+
+fig.update_layout(
+    margin=dict(l=10, r=10, t=10, b=10),
+    paper_bgcolor='rgba(0,0,0,0)',
+    plot_bgcolor='rgba(0,0,0,0)',
+    xaxis=dict(
+        showgrid=True, 
+        gridcolor='#262730', 
+        linecolor='#262730',
+        title_font=dict(color='#a3a8b4'),
+        tickfont=dict(color='#a3a8b4')
+    ),
+    yaxis=dict(
+        showgrid=True, 
+        gridcolor='#262730', 
+        linecolor='#262730',
+        title_font=dict(color='#a3a8b4'),
+        tickfont=dict(color='#a3a8b4')
+    ),
+    hovermode='x unified',
+    template='plotly_dark',
+    height=450
+)
+
+st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': True})
