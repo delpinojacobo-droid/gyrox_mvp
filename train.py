@@ -14,7 +14,6 @@ def train_asymmetric_engine():
     if df['target_restriction_30d'].nunique() < 2:
         df.iloc[-15:, df.columns.get_loc('target_restriction_30d')] = 1
         
-    # Features align with our unique structural upgrades
     X = df[['alpha_decayed', 'beta_decayed', 'sovereign_spread', 'mineral_spot_price', 'market_volume_deviations']]
     y = df['target_restriction_30d']
     
@@ -24,8 +23,9 @@ def train_asymmetric_engine():
     model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.05, max_depth=3, random_state=42)
     model.fit(X, y, sample_weight=asymmetric_weights)
     
+    # FIXED: Direct clean serialization dump without parameter assignment conflicts
     with open("gyrox_model.pkl", "wb") as f:
-        pickle.load = pickle.dump(model, f)
+        pickle.dump(model, f)
         
     print("[✓] Asymmetric Core Machine Learning Model exported successfully.")
 

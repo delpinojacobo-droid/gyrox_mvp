@@ -64,9 +64,16 @@ else:
 # Calculate Sovereign Divergence Spread Live
 active_spread = np.abs(active_alpha - active_beta)
 
-# Run inputs directly through the upgraded feature vector configuration
-input_vector = np.array([[active_alpha, active_beta, active_spread, active_price, 0.05]])
-risk_probability = model.predict_proba(input_vector)[0][1] * 100
+# FIX: Map inputs into an explicit DataFrame with matching feature names to satisfy the scikit-learn matrix check
+input_df = pd.DataFrame([{
+    'alpha_decayed': active_alpha,
+    'beta_decayed': active_beta,
+    'sovereign_spread': active_spread,
+    'mineral_spot_price': active_price,
+    'market_volume_deviations': 0.05
+}])
+
+risk_probability = model.predict_proba(input_df)[0][1] * 100
 
 # Primary Metrics Display Matrix
 st.markdown("---")
