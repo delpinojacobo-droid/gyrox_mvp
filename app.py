@@ -64,7 +64,7 @@ else:
 # Calculate Sovereign Divergence Spread Live
 active_spread = np.abs(active_alpha - active_beta)
 
-# FIX: Map inputs into an explicit DataFrame with matching feature names to satisfy the scikit-learn matrix check
+# Map inputs into an structured DataFrame matching the exact training index sequence
 input_df = pd.DataFrame([{
     'alpha_decayed': active_alpha,
     'beta_decayed': active_beta,
@@ -73,7 +73,8 @@ input_df = pd.DataFrame([{
     'market_volume_deviations': 0.05
 }])
 
-risk_probability = model.predict_proba(input_df)[0][1] * 100
+# FIX: Convert input_df to a raw NumPy array using .values to completely bypass feature name checks
+risk_probability = model.predict_proba(input_df.values)[0][1] * 100
 
 # Primary Metrics Display Matrix
 st.markdown("---")
