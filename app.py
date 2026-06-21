@@ -1,9 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import yfinance as yf
 import pickle
-from datetime import datetime, timedelta
+from datetime import datetime
 
 st.set_page_config(page_title="Gyrox Engine Core", layout="wide", initial_sidebar_state="collapsed")
 
@@ -80,7 +79,8 @@ with m_col4:
 st.markdown("---")
 st.subheader("Historical Market Baseline Analytics (Multi-Year Asset Horizon)")
 
-# FIX: Map the chart data directly to the continuous historical data lake rows
+# FIX: Keep timestamp as a true datetime64 object so the graph uses a fluid, native time axis scale
 chart_df = historical_lake.copy()
-chart_df['timestamp'] = pd.to_datetime(chart_df['timestamp']).dt.strftime('%Y-%m-%d')
+chart_df['timestamp'] = pd.to_datetime(chart_df['timestamp'])
+
 st.line_chart(data=chart_df, x='timestamp', y='mineral_spot_price', use_container_width=True)
