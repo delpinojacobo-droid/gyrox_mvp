@@ -15,7 +15,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# FIX: Removed @st.cache_resource decorator to force absolute file synchronization
 def load_core_model():
     with open("gyrox_model.pkl", "rb") as f:
         return pickle.load(f)
@@ -26,22 +25,13 @@ except Exception as e:
     st.error(f"Core Offline: {e}")
     st.stop()
 
-# Live Data Fetch Handshake
-@st.cache_data(ttl=3600)
-def fetch_live_market_matrix():
-    try:
-        data = yf.download("SOXX", start=(datetime.today() - timedelta(days=120)).strftime('%Y-%m-%d'))
-        if isinstance(data.columns, pd.MultiIndex): data.columns = data.columns.droplevel(1)
-        data = data[['Close', 'Volume']].reset_index()
-        data.columns = ['timestamp', 'Close', 'Volume']
-    except:
-        dates = pd.date_range(end=datetime.today(), periods=90)
-        prices = np.linspace(420, 639.45, 90) + np.random.normal(0, 10, 90)
-        data = pd.DataFrame({"timestamp": dates, "Close": prices, "Volume": [500000]*90})
-    return data
-
-market_data = fetch_live_market_matrix()
-current_live_price = float(market_data['Close'].iloc[-1])
+# Load the deep multi-year repository for data continuity mapping
+try:
+    historical_lake = pd.read_csv("feature_matrix.csv")
+    current_live_price = float(historical_lake['mineral_spot_price'].iloc[-1])
+except Exception as e:
+    st.error(f"Data Lake Connection Fault: {e}")
+    st.stop()
 
 st.title("Gyrox Engine // Geopolitical Intelligence Core")
 st.caption("Institutional Additive Ensemble Model with Asymmetric Loss Optimization Matrix")
@@ -64,7 +54,6 @@ else:
 # Calculate Sovereign Divergence Spread Live
 active_spread = np.abs(active_alpha - active_beta)
 
-# Map inputs into a structured DataFrame matching the training index sequence precisely
 input_df = pd.DataFrame([{
     'alpha_decayed': active_alpha,
     'beta_decayed': active_beta,
@@ -73,7 +62,6 @@ input_df = pd.DataFrame([{
     'market_volume_deviations': 0.05
 }])
 
-# Process using pure raw mathematical values to guarantee complete name alignment safety
 risk_probability = model.predict_proba(input_df.values)[0][1] * 100
 
 # Primary Metrics Display Matrix
@@ -90,7 +78,9 @@ with m_col4:
     st.metric("Proxy Spot Benchmark", f"${active_price:,.2f} USD")
 
 st.markdown("---")
-st.subheader("Historical Market Baseline Analytics (90-Day Asset Horizon)")
-chart_df = market_data.tail(90).copy()
+st.subheader("Historical Market Baseline Analytics (Multi-Year Asset Horizon)")
+
+# FIX: Map the chart data directly to the continuous historical data lake rows
+chart_df = historical_lake.copy()
 chart_df['timestamp'] = pd.to_datetime(chart_df['timestamp']).dt.strftime('%Y-%m-%d')
-st.line_chart(data=chart_df, x='timestamp', y='Close', use_container_width=True)
+st.line_chart(data=chart_df, x='timestamp', y='mineral_spot_price', use_container_width=True)
