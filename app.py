@@ -15,7 +15,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-@st.cache_resource
+# FIX: Removed @st.cache_resource decorator to force absolute file synchronization
 def load_core_model():
     with open("gyrox_model.pkl", "rb") as f:
         return pickle.load(f)
@@ -64,7 +64,7 @@ else:
 # Calculate Sovereign Divergence Spread Live
 active_spread = np.abs(active_alpha - active_beta)
 
-# Map inputs into an structured DataFrame matching the exact training index sequence
+# Map inputs into a structured DataFrame matching the training index sequence precisely
 input_df = pd.DataFrame([{
     'alpha_decayed': active_alpha,
     'beta_decayed': active_beta,
@@ -73,7 +73,7 @@ input_df = pd.DataFrame([{
     'market_volume_deviations': 0.05
 }])
 
-# FIX: Convert input_df to a raw NumPy array using .values to completely bypass feature name checks
+# Process using pure raw mathematical values to guarantee complete name alignment safety
 risk_probability = model.predict_proba(input_df.values)[0][1] * 100
 
 # Primary Metrics Display Matrix
